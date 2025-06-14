@@ -33,7 +33,7 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/benoitpetit/duckduckGO-chat-interface"
+    "url": "git+https://github.com/benoitpetit/duckduckGO-chat-interface.git"
   },
   "bugs": {
     "url": "https://github.com/benoitpetit/duckduckGO-chat-interface/issues"
