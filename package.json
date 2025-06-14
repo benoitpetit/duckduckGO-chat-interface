@@ -1,0 +1,54 @@
+{
+  "name": "duckduckgo-chat-interface",
+  "version": "1.0.0",
+  "description": "Une interface Node.js pour interagir avec l'API de chat DuckDuckGo basée sur la rétro-ingénierie",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js",
+    "example": "node example.js",
+    "build": "echo 'No build process needed'",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "duckduckgo",
+    "chat",
+    "ai",
+    "api",
+    "interface",
+    "gpt",
+    "claude",
+    "llama",
+    "mixtral",
+    "reverse-engineering",
+    "chatbot"
+  ],
+  "author": "DuckDuckGo Chat CLI Team",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "tough-cookie": "^4.1.3"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benoitpetit/duckduckGO-chat-interface"
+  },
+  "bugs": {
+    "url": "https://github.com/benoitpetit/duckduckGO-chat-interface/issues"
+  },
+  "homepage": "https://github.com/benoitpetit/duckduckGO-chat-interface#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
