@@ -6,8 +6,8 @@
   "types": "index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "node test.js",
-    "example": "node example.js",
+    "test": "node examples/test.js",
+    "example": "node examples/example.js",
     "example:react": "echo 'Voir examples/react-example.jsx pour l\\'exemple React'",
     "example:vue": "echo 'Voir examples/vue-example.vue pour l\\'exemple Vue'",
     "build": "echo 'No build process needed'",
