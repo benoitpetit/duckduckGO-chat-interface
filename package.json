@@ -1,15 +1,13 @@
 {
   "name": "duckduckgo-chat-interface",
-  "version": "1.1.1",
-  "description": "Interface Node.js et browser pour l'API DuckDuckGo Chat avec hooks React/Vue.js",
+  "version": "1.1.2",
+  "description": "Une interface Node.js pour interagir avec l'API de chat DuckDuckGo basée sur la rétro-ingénierie",
   "main": "index.js",
   "types": "index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "node examples/test.js",
-    "example": "node examples/example.js",
-    "example:react": "echo 'Voir examples/react-example.jsx pour l\\'exemple React'",
-    "example:vue": "echo 'Voir examples/vue-example.vue pour l\\'exemple Vue'",
+    "test": "node test.js",
+    "example": "node example.js",
     "build": "echo 'No build process needed'",
     "prepublishOnly": "npm test"
   },
@@ -24,25 +22,13 @@
     "llama",
     "mixtral",
     "reverse-engineering",
-    "chatbot",
-    "react",
-    "vue",
-    "hooks",
-    "composables",
-    "nextjs",
-    "nuxt",
-    "frontend",
-    "streaming"
+    "chatbot"
   ],
   "author": "DuckDuckGo Chat CLI Team",
   "license": "MIT",
   "dependencies": {
     "node-fetch": "^3.3.2",
     "tough-cookie": "^4.1.3"
-  },
-  "peerDependencies": {
-    "react": ">=16.8.0",
-    "vue": ">=3.0.0"
   },
   "devDependencies": {},
   "repository": {
@@ -59,8 +45,6 @@
   "files": [
     "index.js",
     "index.d.ts",
-    "hooks/",
-    "examples/",
     "README.md",
     "LICENSE"
   ],
