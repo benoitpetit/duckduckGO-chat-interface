@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDuckDuckGoChat, useSimpleDuckChat } from '../hooks/react.js';
-import { Models } from '../index.js';
+import { Models } from '../hooks/browser.js';
 
 // Exemple d'interface de chat complète avec React
 function ChatInterface() {

@@ -1,18 +1,23 @@
-// Export des hooks React
+// Export des hooks React browser-compatible
 export { 
   useDuckDuckGoChat as useReactDuckDuckGoChat,
   useSimpleDuckChat as useReactSimpleDuckChat
 } from './react.js';
 
-// Export des composables Vue
+// Export des composables Vue browser-compatible
 export { 
   useDuckDuckGoChat as useVueDuckDuckGoChat,
   useSimpleDuckChat as useVueSimpleDuckChat,
   usePersistentDuckChat as useVuePersistentDuckChat
 } from './vue.js';
 
-// Export des types
-export * from './types.d.ts';
+// Export des utilitaires browser
+export { 
+  Models,
+  BrowserDuckDuckGoChat,
+  getVQD,
+  sendChatMessage
+} from './browser.js';
 
-// Re-export des modèles et classes principales pour faciliter l'import
-export { Models, DuckDuckGoChat } from '../index.js'; 
+// Export des types
+export * from './types.d.ts'; 

@@ -1,5 +1,5 @@
 import { ref, reactive, computed, onUnmounted, watch } from 'vue';
-import { DuckDuckGoChat, Models } from '../index.js';
+import { BrowserDuckDuckGoChat, Models } from './browser.js';
 
 /**
  * Composable Vue.js pour l'interface de chat DuckDuckGo
@@ -36,7 +36,7 @@ export function useDuckDuckGoChat(initialModel = Models.GPT4Mini) {
       isLoading.value = true;
       error.value = null;
       
-      chatInstance = new DuckDuckGoChat(currentModel.value);
+      chatInstance = new BrowserDuckDuckGoChat(currentModel.value);
       await chatInstance.initialize();
       
       isInitialized.value = true;
@@ -240,7 +240,7 @@ export function useSimpleDuckChat(model = Models.GPT4Mini) {
       response.value = '';
 
       if (!chatInstance) {
-        chatInstance = new DuckDuckGoChat(model);
+        chatInstance = new BrowserDuckDuckGoChat(model);
         await chatInstance.initialize();
       }
 

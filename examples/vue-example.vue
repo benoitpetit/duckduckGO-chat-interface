@@ -33,6 +33,8 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useDuckDuckGoChat, useSimpleDuckChat, usePersistentDuckChat } from '../hooks/vue.js';
+import { Models } from '../hooks/browser.js';
 import ChatInterface from './components/ChatInterface.vue';
 import SimpleChat from './components/SimpleChat.vue';
 import PersistentChat from './components/PersistentChat.vue';

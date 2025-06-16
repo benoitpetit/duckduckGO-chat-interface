@@ -1,5 +1,19 @@
 import { Ref } from 'vue';
-import { Models, Message } from '../index.d.ts';
+
+// Types pour les modèles (copie locale pour éviter la dépendance Node.js)
+export declare const Models: {
+  readonly GPT4Mini: 'gpt-4o-mini';
+  readonly Claude3: 'claude-3-haiku-20240307';
+  readonly Llama: 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
+  readonly Mixtral: 'mistralai/Mistral-Small-24B-Instruct-2501';
+  readonly O4Mini: 'o4-mini';
+};
+
+// Types pour les messages
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 // Types pour les messages étendus avec métadonnées
 export interface ExtendedMessage extends Message {
@@ -122,5 +136,56 @@ export declare function usePersistentDuckChat(
   storageKey?: string,
   initialModel?: string
 ): UsePersistentDuckChatReturn;
+
+// Déclaration de la classe browser-compatible
+export declare class BrowserDuckDuckGoChat {
+  constructor(model?: string);
+  
+  /**
+   * Initialise la session de chat
+   */
+  initialize(): Promise<BrowserDuckDuckGoChat>;
+  
+  /**
+   * Envoie un message et retourne la réponse complète
+   */
+  sendMessage(content: string): Promise<string>;
+  
+  /**
+   * Envoie un message et retourne un stream avec callback
+   */
+  sendMessageStream(content: string, onChunk?: (chunk: string) => void): Promise<string>;
+  
+  /**
+   * Efface l'historique de la conversation
+   */
+  clear(): Promise<void>;
+  
+  /**
+   * Change le modèle utilisé
+   */
+  setModel(model: string): void;
+  
+  /**
+   * Obtient l'historique des messages
+   */
+  getHistory(): Message[];
+  
+  /**
+   * Obtient les modèles disponibles
+   */
+  static getAvailableModels(): string[];
+}
+
+// Fonctions utilitaires browser
+export declare function getVQD(): Promise<string | null>;
+
+export declare function sendChatMessage(
+  content: string,
+  model?: string,
+  messages?: Message[],
+  vqd?: string | null,
+  onChunk?: (chunk: string) => void
+): Promise<{ response: string; vqd: string }>;
 
 export default useDuckDuckGoChat; 

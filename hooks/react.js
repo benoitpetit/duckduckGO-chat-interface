@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { DuckDuckGoChat, Models } from '../index.js';
+import { BrowserDuckDuckGoChat, Models } from './browser.js';
 
 /**
  * Hook React pour l'interface de chat DuckDuckGo
@@ -25,7 +25,7 @@ export function useDuckDuckGoChat(initialModel = Models.GPT4Mini) {
       setIsLoading(true);
       setError(null);
       
-      chatRef.current = new DuckDuckGoChat(currentModel);
+      chatRef.current = new BrowserDuckDuckGoChat(currentModel);
       await chatRef.current.initialize();
       
       setIsInitialized(true);
@@ -191,7 +191,7 @@ export function useSimpleDuckChat(model = Models.GPT4Mini) {
       setResponse('');
 
       if (!chatRef.current) {
-        chatRef.current = new DuckDuckGoChat(model);
+        chatRef.current = new BrowserDuckDuckGoChat(model);
         await chatRef.current.initialize();
       }
 
