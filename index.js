@@ -2,7 +2,200 @@ import fetch from 'node-fetch';
 import { CookieJar } from 'tough-cookie';
 
 /**
- * Modèles disponibles pour le chat DuckDuckGo
+ * Configuration for personnalized chat
+ */
+export class ChatConfig {
+  constructor(options = {}) {
+    // General configuration
+    this.timeout = options.timeout || 30000; // 30s default
+    this.maxRetries = options.maxRetries || 3;
+    this.retryDelay = options.retryDelay || 2000; // 2s default
+    
+    // Intelligent rate limiting
+    this.rateLimiting = {
+      enabled: options.rateLimiting?.enabled ?? true,
+      maxRequestsPerMinute: options.rateLimiting?.maxRequestsPerMinute || 10,
+      maxRequestsPerHour: options.rateLimiting?.maxRequestsPerHour || 100,
+      _requestTimes: [], // Request history
+      _hourlyRequestTimes: []
+    };
+    
+    // Configuration duckduckgo tools
+    this.tools = {
+      webSearch: options.tools?.webSearch ?? false,
+      newsSearch: options.tools?.newsSearch ?? false,
+      videosSearch: options.tools?.videosSearch ?? false,
+      localSearch: options.tools?.localSearch ?? false,
+      weatherForecast: options.tools?.weatherForecast ?? false
+    };
+    
+    // Advanced options
+    this.userAgent = options.userAgent || 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36';
+    this.language = options.language || 'fr-FR,fr;q=0.6';
+    this.enableLogging = options.enableLogging ?? false;
+  }
+
+  /**
+   * Checks if a request can be sent according to rate limiting rules
+   */
+  canMakeRequest() {
+    if (!this.rateLimiting.enabled) return true;
+
+    const now = Date.now();
+    const oneMinuteAgo = now - 60000;
+    const oneHourAgo = now - 3600000;
+
+    // Clean old request history
+    this.rateLimiting._requestTimes = this.rateLimiting._requestTimes.filter(time => time > oneMinuteAgo);
+    this.rateLimiting._hourlyRequestTimes = this.rateLimiting._hourlyRequestTimes.filter(time => time > oneHourAgo);
+
+    // Check limits
+    const requestsLastMinute = this.rateLimiting._requestTimes.length;
+    const requestsLastHour = this.rateLimiting._hourlyRequestTimes.length;
+
+    return requestsLastMinute < this.rateLimiting.maxRequestsPerMinute && 
+           requestsLastHour < this.rateLimiting.maxRequestsPerHour;
+  }
+
+  /**
+   * Records a new request in the history
+   */
+  recordRequest() {
+    if (!this.rateLimiting.enabled) return;
+
+    const now = Date.now();
+    this.rateLimiting._requestTimes.push(now);
+    this.rateLimiting._hourlyRequestTimes.push(now);
+  }
+
+  /**
+   * Calculates wait time before next possible request
+   */
+  getWaitTimeMs() {
+    if (!this.rateLimiting.enabled || this.canMakeRequest()) return 0;
+
+    const now = Date.now();
+    const oneMinuteAgo = now - 60000;
+    
+    // Find oldest request within the minute
+    const oldestRequestInMinute = this.rateLimiting._requestTimes
+      .filter(time => time > oneMinuteAgo)
+      .sort()[0];
+
+    if (oldestRequestInMinute) {
+      return Math.max(0, oldestRequestInMinute + 60000 - now);
+    }
+
+    return 0;
+  }
+
+  /**
+   * Converts tool configuration to DuckDuckGo API format
+   * Available tools vary by model
+   */
+  getToolChoicePayload(model = Models.GPT4Mini) {
+    const baseTools = {
+      NewsSearch: this.tools.newsSearch,
+      VideosSearch: this.tools.videosSearch,
+      LocalSearch: this.tools.localSearch,
+      WeatherForecast: this.tools.weatherForecast
+    };
+
+    // WebSearch is only available for GPT-4o mini
+    if (model === Models.GPT4Mini) {
+      return {
+        WebSearch: this.tools.webSearch,
+        ...baseTools
+      };
+    }
+
+    return baseTools;
+  }
+
+  /**
+   * Enables or disables all tools
+   */
+  setAllTools(enabled) {
+    this.tools.webSearch = enabled;
+    this.tools.newsSearch = enabled;
+    this.tools.videosSearch = enabled;
+    this.tools.localSearch = enabled;
+    this.tools.weatherForecast = enabled;
+  }
+
+  /**
+   * Predefined configuration for web search (GPT-4o mini only)
+   */
+  static webSearchMode() {
+    return new ChatConfig({
+      tools: {
+        webSearch: true,
+        newsSearch: false,
+        videosSearch: false,
+        localSearch: false,
+        weatherForecast: false
+      }
+    });
+  }
+
+  /**
+   * Predefined configuration for news search
+   */
+  static newsMode() {
+    return new ChatConfig({
+      tools: {
+        webSearch: false,
+        newsSearch: true,
+        videosSearch: false,
+        localSearch: false,
+        weatherForecast: false
+      }
+    });
+  }
+
+  /**
+   * Predefined configuration for local search and weather
+   */
+  static localMode() {
+    return new ChatConfig({
+      tools: {
+        webSearch: false,
+        newsSearch: false,
+        videosSearch: false,
+        localSearch: true,
+        weatherForecast: true
+      }
+    });
+  }
+
+  /**
+   * Predefined configuration for high volume usage
+   */
+  static highVolumeMode() {
+    return new ChatConfig({
+      rateLimiting: {
+        enabled: true,
+        maxRequestsPerMinute: 20,
+        maxRequestsPerHour: 500
+      },
+      maxRetries: 5,
+      retryDelay: 1000
+    });
+  }
+
+  /**
+   * Logs information if logging is enabled
+   */
+  log(message, level = 'info') {
+    if (this.enableLogging) {
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] [${level.toUpperCase()}] ${message}`);
+    }
+  }
+}
+
+/**
+ * Available models for DuckDuckGo chat
  */
 export const Models = {
   GPT4Mini: 'gpt-4o-mini',
@@ -13,7 +206,7 @@ export const Models = {
 };
 
 /**
- * URLs de l'API DuckDuckGo
+ * DuckDuckGo API URLs
  */
 const API_URLS = {
   STATUS: 'https://duckduckgo.com/duckchat/v1/status',
@@ -21,7 +214,7 @@ const API_URLS = {
 };
 
 /**
- * Headers dynamiques extraits de la rétro-ingénierie
+ * Dynamic headers extracted from reverse engineering
  */
 const DYNAMIC_HEADERS = {
   FE_SIGNALS: 'eyJzdGFydCI6MTc0OTgyODU3NzE1NiwiZXZlbnRzIjpbeyJuYW1lIjoic3RhcnROZXdDaGF0IiwiZGVsdGEiOjYwfV0sImVuZCI6NTM4MX0=',
@@ -30,7 +223,7 @@ const DYNAMIC_HEADERS = {
 };
 
 /**
- * Configuration des cookies nécessaires
+ * Required cookies configuration
  */
 const REQUIRED_COOKIES = [
   { name: '5', value: '1' },
@@ -42,13 +235,13 @@ const REQUIRED_COOKIES = [
 ];
 
 /**
- * Obtient le token VQD nécessaire pour l'authentification
+ * Gets the VQD token required for authentication
  */
 async function getVQD() {
   try {
     const cookieJar = new CookieJar();
     
-    // Ajouter les cookies requis
+    // Add required cookies
     for (const cookie of REQUIRED_COOKIES) {
       await cookieJar.setCookie(`${cookie.name}=${cookie.value}; Domain=.duckduckgo.com`, 'https://duckduckgo.com');
     }
@@ -77,17 +270,18 @@ async function getVQD() {
 
     return response.headers.get('x-vqd-4');
   } catch (error) {
-    console.error('Erreur lors de la récupération du VQD:', error);
+    console.error('Error retrieving VQD:', error);
     return null;
   }
 }
 
 /**
- * Classe principale pour gérer une session de chat
+ * Main class for managing a chat session
  */
 export class DuckDuckGoChat {
-  constructor(model = Models.GPT4Mini) {
+  constructor(model = Models.GPT4Mini, config = null) {
     this.model = model;
+    this.config = config || new ChatConfig();
     this.messages = [];
     this.vqd = null;
     this.retryCount = 0;
@@ -96,7 +290,7 @@ export class DuckDuckGoChat {
   }
 
   /**
-   * Initialise les cookies requis
+   * Initializes required cookies
    */
   async _initializeCookies() {
     for (const cookie of REQUIRED_COOKIES) {
@@ -105,39 +299,40 @@ export class DuckDuckGoChat {
   }
 
   /**
-   * Initialise la session de chat
+   * Initializes the chat session
    */
   async initialize() {
     this.vqd = await getVQD();
     if (!this.vqd) {
-      throw new Error('Impossible d\'obtenir le token VQD');
+      throw new Error('Unable to obtain VQD token');
     }
     return this;
   }
 
   /**
-   * Envoie un message et retourne la réponse complète
+   * Sends a message and returns the complete response
    */
-  async sendMessage(content) {
+  async sendMessage(content, images = null) {
+    // Check rate limiting
+    await this._handleRateLimit();
+
     if (!this.vqd) {
       await this.initialize();
     }
 
-    // Ajouter le message utilisateur à l'historique
+    const messageContent = this._formatMessageContent(content, images);
+    this.config.log(`Sending message: ${typeof content === 'string' ? content.substring(0, 50) : 'Message with images'}...`);
+
+    // Add user message to history
     this.messages.push({
       role: 'user',
-      content: content
+      content: messageContent
     });
 
     const payload = {
       model: this.model,
       metadata: {
-        toolChoice: {
-          NewsSearch: false,
-          VideosSearch: false,
-          LocalSearch: false,
-          WeatherForecast: false
-        }
+        toolChoice: this.config.getToolChoicePayload(this.model)
       },
       messages: this.messages,
       canUseTools: true
@@ -172,20 +367,20 @@ export class DuckDuckGoChat {
       });
 
       if (!response.ok) {
-        // Gestion des erreurs avec retry automatique
+        // Error handling with automatic retry
         if (response.status === 418 || response.status === 429) {
-          if (this.retryCount < 3) {
+          if (this.retryCount < this.config.maxRetries) {
             this.retryCount++;
-            console.log(`🔄 Retry automatique (tentative ${this.retryCount}/3)...`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            this.config.log(`🔄 Automatic retry (attempt ${this.retryCount}/${this.config.maxRetries})...`, 'warn');
+            await new Promise(resolve => setTimeout(resolve, this.config.retryDelay));
             this.vqd = await getVQD();
             return this.sendMessage(content);
           }
         }
-        throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
       }
 
-      // Mettre à jour le VQD pour les prochaines requêtes
+      // Update VQD for next requests
       const newVqd = response.headers.get('x-vqd-4');
       if (newVqd) {
         this.vqd = newVqd;
@@ -193,10 +388,10 @@ export class DuckDuckGoChat {
 
       this.retryCount = 0;
 
-      // Traiter le streaming
+      // Process streaming
       const fullResponse = await this._processStreamResponse(response);
       
-      // Ajouter la réponse à l'historique
+      // Add response to history
       this.messages.push({
         role: 'assistant',
         content: fullResponse
@@ -204,33 +399,34 @@ export class DuckDuckGoChat {
 
       return fullResponse;
     } catch (error) {
-      throw new Error(`Erreur lors de l'envoi du message: ${error.message}`);
+      throw new Error(`Error sending message: ${error.message}`);
     }
   }
 
   /**
-   * Envoie un message et retourne un stream
+   * Sends a message and returns a stream
    */
-  async sendMessageStream(content, onChunk) {
+  async sendMessageStream(content, onChunk, images = null) {
+    // Check rate limiting
+    await this._handleRateLimit();
+
     if (!this.vqd) {
       await this.initialize();
     }
 
-    // Ajouter le message utilisateur à l'historique
+    const messageContent = this._formatMessageContent(content, images);
+    this.config.log(`Sending streaming message: ${typeof content === 'string' ? content.substring(0, 50) : 'Message with images'}...`);
+
+    // Add user message to history
     this.messages.push({
       role: 'user',
-      content: content
+      content: messageContent
     });
 
     const payload = {
       model: this.model,
       metadata: {
-        toolChoice: {
-          NewsSearch: false,
-          VideosSearch: false,
-          LocalSearch: false,
-          WeatherForecast: false
-        }
+        toolChoice: this.config.getToolChoicePayload(this.model)
       },
       messages: this.messages,
       canUseTools: true
@@ -265,10 +461,10 @@ export class DuckDuckGoChat {
       });
 
       if (!response.ok) {
-        throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
       }
 
-      // Mettre à jour le VQD
+      // Update VQD
       const newVqd = response.headers.get('x-vqd-4');
       if (newVqd) {
         this.vqd = newVqd;
@@ -276,12 +472,12 @@ export class DuckDuckGoChat {
 
       return this._processStreamResponseWithCallback(response, onChunk);
     } catch (error) {
-      throw new Error(`Erreur lors de l'envoi du message: ${error.message}`);
+      throw new Error(`Error sending message: ${error.message}`);
     }
   }
 
   /**
-   * Traite la réponse en streaming et retourne le contenu complet
+   * Processes streaming response and returns complete content
    */
   async _processStreamResponse(response) {
     let fullResponse = '';
@@ -294,7 +490,7 @@ export class DuckDuckGoChat {
         buffer += decoder.decode(chunk, { stream: true });
         const lines = buffer.split('\n');
         
-        // Garder la dernière ligne incomplète dans le buffer
+        // Keep last incomplete line in buffer
         buffer = lines.pop() || '';
 
         for (const line of lines) {
@@ -327,7 +523,7 @@ export class DuckDuckGoChat {
   }
 
   /**
-   * Traite la réponse en streaming avec callback
+   * Processes streaming response with callback
    */
   async _processStreamResponseWithCallback(response, onChunk) {
     let fullResponse = '';
@@ -340,12 +536,12 @@ export class DuckDuckGoChat {
         buffer += decoder.decode(chunk, { stream: true });
         const lines = buffer.split('\n');
         
-        // Garder la dernière ligne incomplète dans le buffer
+        // Keep last incomplete line in buffer
         buffer = lines.pop() || '';
 
         for (const line of lines) {
           if (line.trim() === 'data: [DONE]') {
-            // Ajouter la réponse complète à l'historique
+            // Add complete response to history
             this.messages.push({
               role: 'assistant',
               content: fullResponse
@@ -371,7 +567,7 @@ export class DuckDuckGoChat {
       });
 
       response.body.on('end', () => {
-        // Ajouter la réponse complète à l'historique
+        // Add complete response to history
         this.messages.push({
           role: 'assistant',
           content: fullResponse
@@ -386,35 +582,131 @@ export class DuckDuckGoChat {
   }
 
   /**
-   * Efface l'historique de la conversation
+   * Formats message content to support images (GPT-4o mini only)
+   */
+  _formatMessageContent(content, images = null) {
+    // If no images or model doesn't support images, return simple text
+    if (!images || !Array.isArray(images) || this.model !== Models.GPT4Mini) {
+      return content;
+    }
+
+    // Format for GPT-4o mini with images
+    const contentArray = [
+      {
+        type: "text",
+        text: content
+      }
+    ];
+
+    // Add images in required format
+    for (const image of images) {
+      if (image.base64 && image.mimeType) {
+        contentArray.push({
+          type: "image",
+          mimeType: image.mimeType,
+          image: `data:${image.mimeType};base64,${image.base64}`
+        });
+      }
+    }
+
+    return contentArray;
+  }
+
+  /**
+   * Handles rate limiting before sending a request
+   */
+  async _handleRateLimit() {
+    if (!this.config.canMakeRequest()) {
+      const waitTime = this.config.getWaitTimeMs();
+      if (waitTime > 0) {
+        this.config.log(`⏳ Rate limit reached, waiting ${waitTime}ms...`, 'warn');
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+  }
+
+  /**
+   * Configures available tools for next requests
+   */
+  configureTools(toolConfig) {
+    Object.assign(this.config.tools, toolConfig);
+    this.config.log(`🔧 Tools configured: ${JSON.stringify(this.config.tools)}`);
+  }
+
+  /**
+   * Enables web search (GPT-4o mini only)
+   */
+  enableWebSearch() {
+    if (this.model === Models.GPT4Mini) {
+      this.config.tools.webSearch = true;
+      this.config.log('🌐 Web search enabled');
+    } else {
+      this.config.log('⚠️ Web search is only available for GPT-4o mini', 'warn');
+    }
+  }
+
+  /**
+   * Enables news search
+   */
+  enableNewsSearch() {
+    this.config.tools.newsSearch = true;
+    this.config.log('📰 News search enabled');
+  }
+
+  /**
+   * Enables local search and weather
+   */
+  enableLocalFeatures() {
+    this.config.tools.localSearch = true;
+    this.config.tools.weatherForecast = true;
+    this.config.log('🌍 Local features enabled');
+  }
+
+  /**
+   * Checks if current model supports images
+   */
+  supportsImages() {
+    return this.model === Models.GPT4Mini;
+  }
+
+  /**
+   * Checks if current model supports advanced tools
+   */
+  supportsAdvancedTools() {
+    return this.model === Models.GPT4Mini;
+  }
+
+  /**
+   * Clears conversation history
    */
   async clear() {
     this.messages = [];
     this.vqd = await getVQD();
     this.retryCount = 0;
+    this.config.log('🧹 History cleared');
   }
 
   /**
-   * Change le modèle utilisé
+   * Changes the used model
    */
   setModel(model) {
     this.model = model;
   }
 
   /**
-   * Obtient l'historique des messages
+   * Gets message history
    */
   getHistory() {
     return [...this.messages];
   }
 
   /**
-   * Obtient les modèles disponibles
+   * Gets available models
    */
   static getAvailableModels() {
     return Object.values(Models);
   }
 }
 
-// Export par défaut
+// Default export
 export default DuckDuckGoChat;

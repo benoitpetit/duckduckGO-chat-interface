@@ -1,13 +1,94 @@
+export interface ImageContent {
+  base64: string;
+  mimeType: string;
+}
+
+export interface MessageContentText {
+  type: 'text';
+  text: string;
+}
+
+export interface MessageContentImage {
+  type: 'image';
+  mimeType: string;
+  image: string;
+}
+
+export type MessageContent = string | (MessageContentText | MessageContentImage)[];
+
 export interface Message {
   role: 'user' | 'assistant';
-  content: string;
+  content: MessageContent;
 }
 
 export interface ToolChoice {
+  WebSearch?: boolean;
   NewsSearch: boolean;
   VideosSearch: boolean;
   LocalSearch: boolean;
   WeatherForecast: boolean;
+}
+
+export interface ToolConfig {
+  webSearch?: boolean;
+  newsSearch?: boolean;
+  videosSearch?: boolean;
+  localSearch?: boolean;
+  weatherForecast?: boolean;
+}
+
+export interface RateLimitConfig {
+  enabled?: boolean;
+  maxRequestsPerMinute?: number;
+  maxRequestsPerHour?: number;
+}
+
+export interface ChatConfigOptions {
+  timeout?: number;
+  maxRetries?: number;
+  retryDelay?: number;
+  rateLimiting?: RateLimitConfig;
+  tools?: ToolConfig;
+  userAgent?: string;
+  language?: string;
+  enableLogging?: boolean;
+}
+
+export declare class ChatConfig {
+  timeout: number;
+  maxRetries: number;
+  retryDelay: number;
+  rateLimiting: {
+    enabled: boolean;
+    maxRequestsPerMinute: number;
+    maxRequestsPerHour: number;
+    _requestTimes: number[];
+    _hourlyRequestTimes: number[];
+  };
+  tools: {
+    webSearch: boolean;
+    newsSearch: boolean;
+    videosSearch: boolean;
+    localSearch: boolean;
+    weatherForecast: boolean;
+  };
+  userAgent: string;
+  language: string;
+  enableLogging: boolean;
+
+  constructor(options?: ChatConfigOptions);
+  
+  canMakeRequest(): boolean;
+  recordRequest(): void;
+  getWaitTimeMs(): number;
+  getToolChoicePayload(model?: string): ToolChoice;
+  setAllTools(enabled: boolean): void;
+  log(message: string, level?: string): void;
+  
+  static webSearchMode(): ChatConfig;
+  static newsMode(): ChatConfig;
+  static localMode(): ChatConfig;
+  static highVolumeMode(): ChatConfig;
 }
 
 export interface Metadata {
@@ -30,40 +111,70 @@ export declare const Models: {
 };
 
 export declare class DuckDuckGoChat {
-  constructor(model?: string);
+  constructor(model?: string, config?: ChatConfig);
   
   /**
-   * Initialise la session de chat
+   * Initialize the chat session
    */
   initialize(): Promise<DuckDuckGoChat>;
   
   /**
-   * Envoie un message et retourne la réponse complète
+   * Send a message and return the complete response
    */
-  sendMessage(content: string): Promise<string>;
+  sendMessage(content: string, images?: ImageContent[]): Promise<string>;
   
   /**
-   * Envoie un message et retourne un stream avec callback
+   * Send a message and return a stream with callback
    */
-  sendMessageStream(content: string, onChunk?: (chunk: string) => void): Promise<string>;
+  sendMessageStream(content: string, onChunk?: (chunk: string) => void, images?: ImageContent[]): Promise<string>;
   
   /**
-   * Efface l'historique de la conversation
+   * Configure available tools for next requests
+   */
+  configureTools(toolConfig: ToolConfig): void;
+  
+  /**
+   * Enable web search (GPT-4o mini only)
+   */
+  enableWebSearch(): void;
+  
+  /**
+   * Enable news search
+   */
+  enableNewsSearch(): void;
+  
+  /**
+   * Enable local search and weather features
+   */
+  enableLocalFeatures(): void;
+  
+  /**
+   * Check if the current model supports images
+   */
+  supportsImages(): boolean;
+  
+  /**
+   * Check if the current model supports advanced tools
+   */
+  supportsAdvancedTools(): boolean;
+  
+  /**
+   * Clear conversation history
    */
   clear(): Promise<void>;
   
   /**
-   * Change le modèle utilisé
+   * Change the model used
    */
   setModel(model: string): void;
   
   /**
-   * Obtient l'historique des messages
+   * Get message history
    */
   getHistory(): Message[];
   
   /**
-   * Obtient les modèles disponibles
+   * Get available models
    */
   static getAvailableModels(): string[];
 }

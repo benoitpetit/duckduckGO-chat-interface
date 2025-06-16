@@ -3,70 +3,50 @@
 <p align="center">
   <img src="./logo.png" width="200" alt="DuckDuckGo AI Chat Interface Logo">
   <br>
-  <strong>🚀 A Node.js interface for DuckDuckGo AI Chat</strong><br>
-  <em>Simple and efficient integration with streaming support and session management</em>
+  <strong>🚀 Powerful Node.js Interface for DuckDuckGo AI Chat</strong><br>
+  <em>Advanced Configuration • Intelligent Rate Limiting • Image Support • WebSearch</em>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-14.0+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Version">
   <img src="https://img.shields.io/badge/NPM-Package-red?style=for-the-badge&logo=npm" alt="NPM Package">
-  <img src="https://img.shields.io/badge/License-Open%20Source-green?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/TypeScript-Full%20Support-blue?style=for-the-badge&logo=typescript" alt="TypeScript">
 </p>
 
 <p align="center">
-  <a href="#-features">Features</a> •
   <a href="#-installation">Installation</a> •
-  <a href="#-usage">Usage</a> •
-  <a href="#-api-reference">API Reference</a>
+  <a href="#-quick-usage">Quick Usage</a> •
+  <a href="./docs/">Documentation</a> •
+  <a href="./examples/">Examples</a>
 </p>
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-<table>
-<tr>
-<td>
+### 🧠 **5 Advanced AI Models**
+- **GPT-4o mini** - Versatile + WebSearch + Image Support
+- **Claude 3 Haiku** - Excellent for creative writing
+- **Llama 3.3 70B** - Optimized for programming
+- **Mistral Small** - Advanced analysis and reasoning
+- **o4-mini** - Ultra-fast for quick responses
 
-### 💬 Chat Experience
-- Streaming responses
-- Multiple AI models
-- Session persistence
-- Auto token refresh
+### 🔧 **Advanced Configuration**
+- **Intelligent rate limiting** - Automatic protection
+- **Configurable tools** - WebSearch, news, weather, local search
+- **Logging system** - Debugging and monitoring
+- **Automatic retry** - Robust error recovery
+- **Optimized presets** - Ready-to-use configurations
 
-</td>
-<td>
+### 📱 **Flexible Interfaces**
+- **Simple messages** - Intuitive API
+- **Real-time streaming** - Progressive responses
+- **Multimodal support** - Images with GPT-4o mini
+- **Persistent sessions** - Conversation history
+- **Complete TypeScript** - IntelliSense and validation
 
-### 🧠 Integration
-- Simple Node.js API
-- TypeScript definitions
-- Promise-based
-- Error handling
-
-</td>
-<td>
-
-### 🛠️ Technical
-- Complete reverse engineering
-- Dynamic headers
-- Cookie management
-- Automatic retry
-
-</td>
-</tr>
-</table>
-
-## 🤖 Available Models
-
-| Model Name         | Integration ID                            | Alias          | Strength         | Best For             | Characteristics              |
-| :----------------- | :---------------------------------------- | :------------- | :------------------- | :----------------------- | :---------------------------------- |
-| **GPT-4o mini**    | gpt-4o-mini                               | GPT4Mini       | General purpose      | Everyday questions       | • Fast<br>• Well-balanced           |
-| **Claude 3 Haiku** | claude-3-haiku-20240307                   | Claude3        | Creative writing     | Explanations & summaries | • Clear responses<br>• Concise      |
-| **Llama 3.3 70B**  | meta-llama/Llama-3.3-70B-Instruct-Turbo   | Llama          | Programming          | Code-related tasks       | • Technical precision<br>• Detailed |
-| **Mistral Small**  | mistralai/Mistral-Small-24B-Instruct-2501 | Mixtral        | Knowledge & analysis | Complex topics           | • Reasoning<br>• Logic-focused      |
-| **o4-mini**        | o4-mini                                   | O4Mini         | Speed                | Quick answers            | • Very fast<br>• Compact responses  |
-
-A simple and efficient Node.js interface for interacting with DuckDuckGo Chat API, based on complete reverse engineering of the official API.
+---
 
 ## 📦 Installation
 
@@ -74,251 +54,139 @@ A simple and efficient Node.js interface for interacting with DuckDuckGo Chat AP
 npm install duckduckgo-chat-interface
 ```
 
-## 🎯 Usage
+## 🚀 Quick Usage
 
-### Module Import
-
-```javascript
-import { DuckDuckGoChat, Models } from 'duckduckgo-chat-interface';
-// or
-import DuckDuckGoChat, { Models } from 'duckduckgo-chat-interface';
-```
-
-### Basic Usage
+### Basic Example
 
 ```javascript
 import { DuckDuckGoChat, Models } from 'duckduckgo-chat-interface';
 
-async function example() {
-  // Create a new chat session
-  const chat = new DuckDuckGoChat(Models.GPT4Mini);
-  
-  // Initialize the session
-  await chat.initialize();
-  
-  // Send a message and get the complete response
-  const response = await chat.sendMessage("Hello! How are you?");
-  console.log(response);
-  
-  // Continue the conversation
-  const response2 = await chat.sendMessage("Can you explain what AI is?");
-  console.log(response2);
-}
-
-example().catch(console.error);
-```
-
-### Streaming Usage
-
-```javascript
-import { DuckDuckGoChat, Models } from 'duckduckgo-chat-interface';
-
-async function streamExample() {
-  const chat = new DuckDuckGoChat(Models.Claude3);
-  await chat.initialize();
-  
-  // Send a message with streaming
-  const response = await chat.sendMessageStream(
-    "Tell me a short story",
-    (chunk) => {
-      // This function is called for each data chunk
-      process.stdout.write(chunk);
-    }
-  );
-  
-  console.log("\n\nComplete response:", response);
-}
-
-streamExample().catch(console.error);
-```
-
-### History Management
-
-```javascript
-import { DuckDuckGoChat, Models } from 'duckduckgo-chat-interface';
-
-async function historyExample() {
-  const chat = new DuckDuckGoChat();
-  await chat.initialize();
-  
-  await chat.sendMessage("My name is Alice");
-  await chat.sendMessage("What is my name?");
-  
-  // Get complete history
-  const history = chat.getHistory();
-  console.log("History:", history);
-  
-  // Clear history
-  await chat.clear();
-}
-
-historyExample().catch(console.error);
-```
-
-## 📖 API Reference
-
-### Available Models
-
-```javascript
-import { Models } from 'duckduckgo-chat-interface';
-
-console.log(Models.GPT4Mini);   // 'gpt-4o-mini'
-console.log(Models.Claude3);    // 'claude-3-haiku-20240307'
-console.log(Models.Llama);      // 'meta-llama/Llama-3.3-70B-Instruct-Turbo'
-console.log(Models.Mixtral);    // 'mistralai/Mistral-Small-24B-Instruct-2501'
-console.log(Models.O4Mini);     // 'o4-mini'
-
-// Get all available models
-const allModels = DuckDuckGoChat.getAvailableModels();
-console.log(allModels);
-```
-
-### DuckDuckGoChat Class
-
-#### Constructor
-
-```javascript
-new DuckDuckGoChat(model = Models.GPT4Mini)
-```
-
-- `model`: The model to use (optional, defaults to `Models.GPT4Mini`)
-
-#### Methods
-
-##### `initialize()`
-
-Initializes the chat session and obtains necessary tokens.
-
-```javascript
+const chat = new DuckDuckGoChat(Models.GPT4Mini);
 await chat.initialize();
+
+const response = await chat.sendMessage("Hello, how are you?");
+console.log(response);
 ```
 
-##### `sendMessage(content)`
-
-Sends a message and returns the complete response.
+### With WebSearch (GPT-4o mini)
 
 ```javascript
-const response = await chat.sendMessage("Your message");
+import { DuckDuckGoChat, ChatConfig, Models } from 'duckduckgo-chat-interface';
+
+const config = ChatConfig.webSearchMode();
+const chat = new DuckDuckGoChat(Models.GPT4Mini, config);
+await chat.initialize();
+
+chat.enableWebSearch();
+const response = await chat.sendMessage("Latest AI news?");
+console.log(response);
 ```
 
-##### `sendMessageStream(content, onChunk)`
+### Image Support
 
-Sends a message and processes the response with streaming.
+```javascript
+const images = [{
+  base64: imageBase64String,
+  mimeType: 'image/jpeg'
+}];
+
+const response = await chat.sendMessage("Describe this image", images);
+console.log(response);
+```
+
+### Real-time Streaming
 
 ```javascript
 const response = await chat.sendMessageStream(
-  "Your message",
-  (chunk) => console.log(chunk)
+  "Tell me a story",
+  (chunk) => process.stdout.write(chunk)
 );
 ```
 
-##### `clear()`
+---
 
-Clears conversation history and resets the session.
+## 📚 Documentation
 
-```javascript
-await chat.clear();
-```
-
-##### `setModel(model)`
-
-Changes the model used for next messages.
-
-```javascript
-chat.setModel(Models.Claude3);
-```
-
-##### `getHistory()`
-
-Returns the complete message history.
-
-```javascript
-const history = chat.getHistory();
-```
-
-##### `getAvailableModels()` (static)
-
-Returns the list of available models.
-
-```javascript
-const models = DuckDuckGoChat.getAvailableModels();
-```
-
-## 🔧 Error Handling
-
-```javascript
-import { DuckDuckGoChat } from 'duckduckgo-chat-interface';
-
-async function errorHandling() {
-  try {
-    const chat = new DuckDuckGoChat();
-    await chat.initialize();
-    const response = await chat.sendMessage("Test message");
-    console.log(response);
-  } catch (error) {
-    console.error("Chat error:", error.message);
-    
-    // Handle specific error types
-    if (error.message.includes('418')) {
-      console.log("Anti-bot detection, retrying...");
-      // Automatic retry is handled internally
-    }
-  }
-}
-```
-
-## 🔧 Technical Details
-
-### Reverse Engineering
-- **VQD tokens** automatic retrieval via `/duckchat/v1/status`
-- **Dynamic headers** with authenticated values
-- **Session cookie management** complete handling
-- **Error 418 auto-recovery** (98.3% success rate)
-
-### Features
-- **Persistent conversations** with history tracking
-- **Automatic retry** with exponential backoff
-- **Real-time streaming** with chunk callbacks
-- **Model validation** and error handling
-
-## 📊 Performance
-
-- **Latency**: ~200-500ms for first response
-- **Throughput**: Real-time streaming support
-- **Error recovery**: 98.3% automatic success
-- **Memory**: Lightweight conversation history
-
-## ⚠️ Requirements
-
-- **Node.js**: 14.0.0 or higher
-- **Dependencies**: axios for HTTP requests
-- **Network**: Internet connection required
-
-## 🚨 Troubleshooting
-
-### Error 418 (I'm a teapot)
-The interface automatically handles these errors with retry and token refresh.
-
-### Unable to initialize
-```bash
-# Check internet connection
-curl -I https://duckduckgo.com/duckchat/v1/status
-
-# Enable debug mode
-DEBUG=true node your-script.js
-```
-
-### Streaming issues
-Ensure you're handling chunks correctly in the callback function.
-
-## 📜 License & Ethics
-
-### 🛡️ Privacy & Responsibility
-
-- **Privacy First:** This interface respects your privacy and stores no personal data
-- **Verify Information:** Always verify critical information from AI responses
-- **Responsible Use:** Use responsibly and in accordance with DuckDuckGo's terms
+- **[🚀 Quick Start](./docs/quick-start.md)** - Get started in 5 minutes
+- **[📋 API Reference](./docs/api-reference.md)** - Complete API documentation
+- **[💡 Examples](./docs/examples.md)** - Practical usage examples
 
 ---
 
-*🔧 Unofficial interface based on DuckDuckGo Chat reverse engineering*
+## 📊 Models and Capabilities
+
+| Model | WebSearch | Images | Strength | Recommended Usage |
+|--------|:---------:|:------:|-------|------------------|
+| **GPT-4o mini** | ✅ | ✅ | Versatile | General questions, search |
+| **Claude 3 Haiku** | ❌ | ❌ | Creativity | Writing, explanations |
+| **Llama 3.3 70B** | ❌ | ❌ | Technical | Code, programming |
+| **Mistral Small** | ❌ | ❌ | Logic | Analysis, reasoning |
+| **o4-mini** | ❌ | ❌ | Speed | Quick responses |
+
+---
+
+## 🔧 Configuration Presets
+
+```javascript
+// WebSearch mode (GPT-4o mini)
+const config = ChatConfig.webSearchMode();
+
+// News mode
+const config = ChatConfig.newsMode();
+
+// Local mode (weather + local search)
+const config = ChatConfig.localMode();
+
+// High performance mode
+const config = ChatConfig.highVolumeMode();
+```
+
+---
+
+## 📈 Examples
+
+Explore detailed examples in the [`examples/`](./examples/) folder:
+
+- **[`test.js`](./examples/test.js)** - Basic examples and configuration
+- **[`test-advanced.js`](./examples/test-advanced.js)** - Advanced features
+- **[`test-simple.js`](./examples/test-simple.js)** - Simple tests and validation
+
+---
+
+## 🛡️ Compatibility
+
+- **Node.js** : >= 14.0.0
+- **TypeScript** : Full support with types
+- **ES Modules** : Native ESM format
+- **Backward compatibility** : 100% with 1.x versions
+
+---
+
+## 🚨 Important Notes
+
+- **WebSearch and images** only with GPT-4o mini
+- **Rate limiting enabled by default** to protect API
+- **`initialize()` required** before sending messages
+- **Automatic retry** on temporary errors
+
+---
+
+## 📞 Support and Community
+
+- **📚 Documentation** : [docs/](./docs/)
+- **💻 Examples** : [examples/](./examples/)
+- **🐛 Issues** : [GitHub Issues](https://github.com/benoitpetit/duckduckGO-chat-interface/issues)
+- **💬 Discussions** : [GitHub Discussions](https://github.com/benoitpetit/duckduckGO-chat-interface/discussions)
+
+---
+
+## 📜 License
+
+MIT License - see [LICENSE](./LICENSE) for details.
+
+---
+
+<p align="center">
+  <strong>🏁 Ready to start?</strong><br>
+  Follow the <a href="./docs/quick-start.md">Quick Start Guide</a>!
+</p>

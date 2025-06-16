@@ -1,15 +1,19 @@
 {
   "name": "duckduckgo-chat-interface",
-  "version": "1.1.2",
-  "description": "Une interface Node.js pour interagir avec l'API de chat DuckDuckGo basée sur la rétro-ingénierie",
+  "version": "1.1.0",
+  "description": "A powerful Node.js interface for DuckDuckGo AI Chat with advanced configuration, rate limiting, and image support",
   "main": "index.js",
   "types": "index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "node test.js",
-    "example": "node example.js",
+    "test": "node examples/test-simple.js",
+    "test:basic": "node examples/test.js",
+    "test:advanced": "node examples/test-advanced.js",
+    "test:all": "npm run test && npm run test:basic && npm run test:advanced",
     "build": "echo 'No build process needed'",
-    "prepublishOnly": "npm test"
+    "docs": "echo 'Documentation available in docs/ directory'",
+    "prepublishOnly": "npm run test",
+    "lint": "echo 'No linter configured'"
   },
   "keywords": [
     "duckduckgo",
@@ -21,10 +25,18 @@
     "claude",
     "llama",
     "mixtral",
+    "openai",
+    "chatbot",
     "reverse-engineering",
-    "chatbot"
+    "rate-limiting",
+    "streaming",
+    "multimodal",
+    "images",
+    "websearch",
+    "configuration",
+    "typescript"
   ],
-  "author": "DuckDuckGo Chat CLI Team",
+  "author": "DuckDuckGo Chat Interface Team",
   "license": "MIT",
   "dependencies": {
     "node-fetch": "^3.3.2",
@@ -46,7 +58,10 @@
     "index.js",
     "index.d.ts",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs/",
+    "examples/",
+    "logo.png"
   ],
   "publishConfig": {
     "access": "public"
