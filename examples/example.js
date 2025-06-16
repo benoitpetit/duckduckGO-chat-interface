@@ -1,4 +1,4 @@
-import { DuckDuckGoChat, Models } from './index.js';
+import { DuckDuckGoChat, Models } from '../index.js';
 
 /**
  * Exemple d'utilisation interactive du package DuckDuckGo Chat Interface

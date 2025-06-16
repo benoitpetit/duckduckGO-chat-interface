@@ -1,4 +1,4 @@
-import { DuckDuckGoChat, Models } from './index.js';
+import { DuckDuckGoChat, Models } from '../index.js';
 
 async function testBasicUsage() {
   console.log('🧪 Test d\'utilisation basique...');
