@@ -267,6 +267,16 @@ async function getVQD() {
         'Cookie': await cookieJar.getCookieString('https://duckduckgo.com')
       }
     });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+    }
+
+    // The working CLI returns the hash, not the vqd-4 token, on the first request.
+    const vqdHash = response.headers.get('x-vqd-hash-1');
+    if (vqdHash) {
+        return vqdHash;
+    }
 
     return response.headers.get('x-vqd-4');
   } catch (error) {

@@ -1,6 +1,6 @@
 {
   "name": "duckduckgo-chat-interface",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "A powerful Node.js interface for DuckDuckGo AI Chat with advanced configuration, rate limiting, and image support",
   "main": "index.js",
   "types": "index.d.ts",
