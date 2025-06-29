@@ -1,6 +1,6 @@
 {
   "name": "duckduckgo-chat-interface",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A powerful Node.js interface for DuckDuckGo AI Chat with advanced configuration, rate limiting, and image support",
   "main": "index.js",
   "types": "index.d.ts",
@@ -13,7 +13,8 @@
     "build": "echo 'No build process needed'",
     "docs": "echo 'Documentation available in docs/ directory'",
     "prepublishOnly": "npm run test",
-    "lint": "echo 'No linter configured'"
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "keywords": [
     "duckduckgo",
@@ -42,7 +43,12 @@
     "node-fetch": "^3.3.2",
     "tough-cookie": "^4.1.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/benoitpetit/duckduckGO-chat-interface.git"
